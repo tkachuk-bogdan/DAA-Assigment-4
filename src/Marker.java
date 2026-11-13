@@ -68,8 +68,59 @@ public class Marker {
      * can have the same hash.
      * Example: a = "ACGTAC", b = "TTACGT", k = 4: the words of a are ACGT, CGTA, GTAC; only ACGT is in b, so the answer is 1.
      */
+    static final long BASE = 131;
+    static final long MOD = 1_000_000_007L;
+
     public static int sharedWords(String a, String b, int k) {
-        // TODO Mission 4
-        return -1;
+        if (k <= 0 || a.length() < k || b.length() < k) {
+            return 0;
+        }
+        long power = 1;
+        for (int i = 0; i < k - 1; i++) {
+            power = power * BASE % MOD;
+        }
+
+        Map<Long, List<Integer>> windowsOfB = new HashMap<>();
+        long h = 0;
+        for (int i = 0; i < b.length(); i++) {
+            if (i >= k) {
+                h = (h - b.charAt(i - k) * power % MOD + MOD) % MOD;
+            }
+            h = (h * BASE + b.charAt(i)) % MOD;
+            if (i >= k - 1) {
+                windowsOfB.computeIfAbsent(h, x -> new ArrayList<>()).add(i - k + 1);
+            }
+        }
+
+        int count = 0;
+        h = 0;
+        for (int i = 0; i < a.length(); i++) {
+            if (i >= k) {
+                h = (h - a.charAt(i - k) * power % MOD + MOD) % MOD;
+            }
+            h = (h * BASE + a.charAt(i)) % MOD;
+            if (i >= k - 1) {
+                int start = i - k + 1;
+                List<Integer> candidates = windowsOfB.get(h);
+                if (candidates != null) {
+                    for (int j : candidates) {
+                        if (sameLetters(a, start, b, j, k)) {
+                            count++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    private static boolean sameLetters(String a, int i, String b, int j, int k) {
+        for (int t = 0; t < k; t++) {
+            if (a.charAt(i + t) != b.charAt(j + t)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
