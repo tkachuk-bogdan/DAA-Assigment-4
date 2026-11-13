@@ -60,11 +60,13 @@ Milliseconds, average of 3 runs, from `java -cp out Bench`.
 
 | test | size | time |
 |---|---|---|
-| naive search | 20 000 / 40 000 / 80 000 | |
-| KMP | 20 000 / 40 000 / 80 000 | |
-| edit distance | 500 / 1000 / 2000 / 4000 | |
+| naive search | 20 000 / 40 000 / 80 000 | 94.7 / 163.9 / 258.1 |
+| KMP | 20 000 / 40 000 / 80 000 | 5.0 / 2.5 / 0.5 |
+| edit distance | 500 / 1000 / 2000 / 4000 | 8.1 / 10.4 / 29.6 / 120.6 |
 
 What do the numbers say about how the time grows? When you double the size, by how much does each time grow? Two or three sentences.
+
+When the text doubles, the naive search grows about 1.6 to 1.7 times, but at every position it compares up to 2000 letters, so it is O(n * m) and 20 to 500 times slower than KMP. KMP stays under 5 ms (it even gets faster because the JVM warms up): it is O(n + m) and reads every letter of the text once. The edit distance grows about 4 times when the length doubles from 2000 to 4000 (29.6 to 120.6 ms), as expected for an n * n table; on small lengths the warm-up hides it.
 
 ## Complexity
 
@@ -72,11 +74,11 @@ n is the length of the text (or of a strain), m the length of the pattern, k the
 
 | algorithm | time | space | assumptions |
 |---|---|---|---|
-| Edit distance | | | |
-| LCS | | | |
-| Prefix function and KMP | | | |
-| Rabin-Karp (shared words) | | | |
-| Tree DP | | | |
+| Edit distance | O(n * m) | O(n * m) | full table of (n+1) x (m+1) cells, each cell in O(1); two rows would be enough for O(m) memory |
+| LCS | O(n * m) | O(n * m) | the same table with another rule; two rows would be enough for O(m) memory |
+| Prefix function and KMP | O(m) + O(n + m) | O(m) | k grows by at most 1 per letter and every step back lowers it, the text pointer never goes back |
+| Rabin-Karp (shared words) | O(n + m) on average, O(n * k) and more in the worst case | O(m) | rolling hash in O(1) per window, hashes of the windows of B in a HashMap; the worst case is many windows with the same hash, each compared letter by letter |
+| Tree DP | O(v) | O(v) | rooted in person 0 with BFS, every person and every link is used a constant number of times |
 
 ## Before you submit
 
